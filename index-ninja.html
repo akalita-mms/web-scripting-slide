@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ninja Themes</title>
+    <meta charset="utf-8">
+    <meta name="author" content="  Emi Tanaka" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+        class: center, middle
+
+        # Webpage script testing
+        
+        by Arindam Kalita
+        
+        
+        ---
+        
+        
+        
+        ## Background
+        
+        * Often marketing and analytics teams implement different scripts and tags in websites which runs in the background
+        
+        <br>
+        <br>
+        
+        ### Example:
+        * A canonical tag is a tag in the source code of a page that indicates to search engines that a master copy of the page exists. 
+        * Canonical tags are used in SEO to help search engines index the correct URL and avoid duplicate content.
+        
+        <br>
+        <br>
+        
+        _Example of wikipedia:_
+        ```html
+        <link rel="canonical" href="https://en.wikipedia.org/wiki/Main_Page">
+        ```
+        
+        ---
+        
+        ### Step 1:
+        
+        Go to home URL. Open Dev tools and go to console.
+        
+        ---
+        
+        ### Step 2:
+        
+        Run the following javascript code in console:
+        
+        > The goal of the code is to extract information from `<a>` tags (links) in a webpage, filter out duplicates based on URL, and generate a CSV output where each row represents a link that is not an external link (`External Link = FALSE`).
+        
+        ---
+        
+        
+        ```js
+        const results = [['URL', 'Anchor Text', 'External Link']];
+        const seenUrls = new Set(); // Set to keep track of unique URLs
+        // Processing Each `<a>` Tag
+        const urls = document.getElementsByTagName('a');
+        for (let urlIndex = 0; urlIndex < urls.length; urlIndex++) {
+            const url = urls[urlIndex];
+            const externalLink = url.host !== window.location.host;
+        
+            if (url.href && url.href.indexOf('://') !== -1 && !seenUrls.has(url.href) && !externalLink) {
+                seenUrls.add(url.href); // Add URL to the set
+                results.push([url.href, url.innerText.trim(), 'FALSE']);
+            }
+        }
+        // CSV Content Generation
+        const csvContent = results.map((line) => {
+            return line.map((cell) => {
+                if (typeof(cell) === 'boolean') {return cell ? 'TRUE' : 'FALSE';}
+                if (!cell) {return '';}
+                let value = cell.replace(/[\f\n\v]*\n\s*/g, "\n").replace(/[\t\f ]+/g, ' ');
+                value = value.replace(/\t/g, ' ').trim();
+                return `"${value}"`;
+            }).join('\t');
+        }).join("\n");
+        // Logging CSV Content
+        console.log(csvContent)
+        ```
+        
+        
+        ---
+        
+        ### Step 3:
+        Copy the CSV output in an Excel or feature file. 
+        
+        ---
+        
+        ### Step 4:
+        
+        Implement in cucumber:
+        
+        ```gherkin
+        Feature: Canonical testing
+        
+        Scenario Outline: Verify canonical tagging in Wikipedia
+        Given User clicks on URL <URL>
+        Then verify that canonical tagging is present in page
+        
+        Examples:
+            | URL                                                  | Anchor Text            | External |
+            | https://en.wikipedia.org/wiki/Main_Page              | Wikipedia              | FALSE    |
+            | https://en.wikipedia.org/wiki/Cora_Agnes_Benneson    | Cora Agnes Benneson    | FALSE    |
+            | https://en.wikipedia.org/wiki/University_of_Michigan | University of Michigan | FALSE    |
+        
+        ```
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
